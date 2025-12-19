@@ -1,128 +1,242 @@
 "use client";
 
-import { ProverbsCard } from "@/components/proverbs";
-import { WeatherCard } from "@/components/weather";
-import { MoonCard } from "@/components/moon";
-import { AgentState } from "@/lib/types";
-import {
-  useCoAgent,
-  useDefaultTool,
-  useFrontendTool,
-  useHumanInTheLoop,
-  useRenderToolCall,
-} from "@copilotkit/react-core";
-import { CopilotKitCSSProperties, CopilotSidebar } from "@copilotkit/react-ui";
 import { useState } from "react";
+import { useCoAgent, useCopilotReadable } from "@copilotkit/react-core";
+import { CopilotChat } from "@copilotkit/react-ui";
+import { ActionButton, BankingState, PromoItem } from "@/lib/types";
+import { TransferConfirmationCard } from "@/components/banking/transfer-card";
+import {
+  JomKiraUserMessage,
+  JomKiraAssistantMessage,
+  JomKiraInput,
+} from "@/components/jomkira/chat-overlay";
+import {
+  PromoCard,
+  PromoCardsContainer,
+} from "@/components/jomkira/promo-cards";
+import { DashboardHeader } from "@/components/jomkira/dashboard-header";
+import { BalanceCard } from "@/components/jomkira/balance-card";
+import { LinkAccountCard } from "@/components/jomkira/link-account-card";
+import { logger } from "@/lib/logger";
+import {
+  ArrowDownLeft,
+  ArrowUpRight,
+  Landmark,
+  PiggyBank,
+  Plus,
+  Scan,
+  ShieldCheck,
+  Sparkles,
+  TrendingUp,
+  Wallet,
+} from "lucide-react";
+import { AccountsSection } from "@/components/jomkira/accounts-section";
+import { AccountItem } from "@/lib/types";
 
-export default function CopilotKitPage() {
-  const [themeColor, setThemeColor] = useState("#6366f1");
+export default function Home() {
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
-  // 🪁 Frontend Actions: https://docs.copilotkit.ai/pydantic-ai/frontend-actions
-  useFrontendTool({
-    name: "setThemeColor",
-    parameters: [
-      {
-        name: "themeColor",
-        description: "The theme color to set. Make sure to pick nice colors.",
-        required: true,
-      },
-    ],
-    handler({ themeColor }) {
-      setThemeColor(themeColor);
-    },
-  });
-
-  return (
-    <main
-      style={
-        { "--copilot-kit-primary-color": themeColor } as CopilotKitCSSProperties
-      }
-    >
-      <CopilotSidebar
-        disableSystemMessage={true}
-        clickOutsideToClose={false}
-        labels={{
-          title: "Popup Assistant",
-          initial: "👋 Hi, there! You're chatting with an agent.",
-        }}
-        suggestions={[
-          {
-            title: "Generative UI",
-            message: "Get the weather in San Francisco.",
-          },
-          {
-            title: "Frontend Tools",
-            message: "Set the theme to green.",
-          },
-          {
-            title: "Human In the Loop",
-            message: "Please go to the moon.",
-          },
-          {
-            title: "Write Agent State",
-            message: "Add a proverb about AI.",
-          },
-          {
-            title: "Update Agent State",
-            message:
-              "Please remove 1 random proverb from the list if there are any.",
-          },
-          {
-            title: "Read Agent State",
-            message: "What are the proverbs?",
-          },
-        ]}
-      >
-        <YourMainContent themeColor={themeColor} />
-      </CopilotSidebar>
-    </main>
-  );
-}
-
-function YourMainContent({ themeColor }: { themeColor: string }) {
-  // 🪁 Shared State: https://docs.copilotkit.ai/pydantic-ai/shared-state
-  const { state, setState } = useCoAgent<AgentState>({
-    name: "my_agent",
+  const { state } = useCoAgent<BankingState>({
+    name: "jom_kira_agent",
     initialState: {
-      proverbs: [
-        "CopilotKit may be new, but its the best thing since sliced bread.",
-      ],
+      balance: 50.43,
+      pending_transfer: null,
+      transaction_history: [],
+      status: "idle",
     },
   });
 
-  //🪁 Generative UI: https://docs.copilotkit.ai/pydantic-ai/generative-ui
-  useRenderToolCall(
-    {
-      name: "get_weather",
-      description: "Get the weather for a given location.",
-      parameters: [{ name: "location", type: "string", required: true }],
-      render: ({ args, result }) => {
-        return <WeatherCard location={args.location} themeColor={themeColor} />;
-      },
-    },
-    [themeColor],
-  );
+  useCopilotReadable({
+    description:
+      "The user's current banking state including balance, pending transfers, and transaction history",
+    value: state,
+  });
 
-  // 🪁 Human In the Loop: https://docs.copilotkit.ai/pydantic-ai/human-in-the-loop
-  useHumanInTheLoop(
+  const handleOpenChat = () => {
+    logger.info("Chat opened via main action");
+    setIsChatOpen(true);
+  };
+
+  const handleCloseChat = () => {
+    logger.info("Chat closed");
+    setIsChatOpen(false);
+  };
+
+  const handlePromoClick = (title: string, id?: string) => {
+    logger.info({ title, id }, "Promo card clicked in dashboard");
+    if (id === "jomkira-ai") {
+      handleOpenChat();
+    }
+  };
+
+  const DASHBOARD_ACTIONS: ActionButton[] = [
+    { label: "Scan", icon: Scan, id: "scan" },
+    { label: "Add money", icon: Plus, id: "add_money" },
+    { label: "Receive", icon: ArrowDownLeft, id: "receive" },
+    { label: "Transfer", icon: ArrowUpRight, id: "transfer" },
+  ];
+
+  const MOCK_ACCOUNTS: AccountItem[] = [
     {
-      name: "go_to_moon",
-      description: "Go to the moon on request.",
-      render: ({ respond, status }) => {
-        return (
-          <MoonCard themeColor={themeColor} status={status} respond={respond} />
-        );
-      },
+      id: "main",
+      name: "Main Account",
+      amount: 50.43,
+      badge: "3.00% p.a.",
+      iconBgColor: "bg-blue-600",
+      icon: Wallet,
     },
-    [themeColor],
-  );
+    {
+      id: "pocket",
+      name: "Jom Pocket",
+      subtitle: "Save Pocket",
+      amount: 0.0,
+      badge: "3.00% p.a.",
+      iconBgColor: "bg-teal-400",
+      icon: PiggyBank,
+    },
+  ];
+
+  const PROMO_DATA: PromoItem[] = [
+    {
+      title: "JomKira PayLater",
+      description: (
+        <>
+          Get credit limit up to
+          <br />
+          RM 1,499
+        </>
+      ),
+      icon: <span className="text-lg font-bold">J</span>,
+      bgColor: "#D1F5FA",
+      textColor: "#006064",
+      subTextColor: "#00838F",
+      actionText: "Apply now",
+    },
+    {
+      title: "JomKira AI",
+      description: "Get RM 5 cashback!",
+      icon: <Sparkles className="h-5 w-5" />,
+      bgColor: "#F3E5F5",
+      textColor: "#7B1FA2",
+      subTextColor: "#AB47BC",
+      actionText: "Learn more",
+      id: "jomkira-ai", // Added ID for easier identification
+    },
+    {
+      title: "Smart Savings",
+      description: "Earn 4.2% p.a. interest today",
+      icon: <TrendingUp className="h-5 w-5" />,
+      bgColor: "#E8F5E9",
+      textColor: "#2E7D32",
+      subTextColor: "#388E3C",
+      actionText: "Save now",
+    },
+    {
+      title: "Card Security",
+      description: "New: Instant card lock feature",
+      icon: <ShieldCheck className="h-5 w-5" />,
+      bgColor: "#FFF3E0",
+      textColor: "#E65100",
+      subTextColor: "#EF6C00",
+      actionText: "Secure now",
+    },
+    {
+      title: "Fixed Deposit",
+      description: "Higher returns for your wealth",
+      icon: <Landmark className="h-5 w-5" />,
+      bgColor: "#E8EAF6",
+      textColor: "#1A237E",
+      subTextColor: "#283593",
+      actionText: "Invest now",
+    },
+  ];
 
   return (
     <div
-      style={{ backgroundColor: themeColor }}
-      className="h-screen flex justify-center items-center flex-col transition-colors duration-300"
+      className={`bg-background relative min-h-screen font-sans transition-all duration-500 ${
+        isChatOpen ? "h-screen overflow-hidden" : "overflow-x-hidden"
+      }`}
     >
-      <ProverbsCard state={state} setState={setState} />
+      {/* Global Background Gradient (Fixed, covers entire screen) */}
+      <div
+        className="pointer-events-none fixed inset-0 -z-10 h-[60vh] w-full"
+        style={{
+          background:
+            "radial-gradient(100% 100% at 50% 0%, #E0F2FE 0%, #F3E8FF 40%, #F2F5F9 100%)",
+          opacity: 1,
+        }}
+      />
+
+      {/* Unified Header & Chat Container */}
+      <DashboardHeader
+        isChatOpen={isChatOpen}
+        onAskAIClick={handleOpenChat}
+        onCloseChat={handleCloseChat}
+      >
+        <CopilotChat
+          instructions="You are JomKira AI, a helpful Malaysian banking assistant. Help users transfer money, pay bills, and manage their finances. Be concise and friendly. Always respond in a warm, helpful manner."
+          labels={{
+            title: "JomKira AI",
+            initial: "How can I help you?",
+            placeholder: "Ask JomKira AI",
+          }}
+          UserMessage={JomKiraUserMessage}
+          AssistantMessage={JomKiraAssistantMessage}
+          Input={JomKiraInput}
+          className="h-full"
+        />
+      </DashboardHeader>
+
+      {/* Main Dashboard Content - Hide when chat is open */}
+      <div
+        className={`relative z-0 mx-auto flex flex-col transition-all duration-500 ${
+          isChatOpen ? "hidden" : "flex"
+        }`}
+      >
+        <main className="bg-background relative z-10 -mt-4 flex-1 space-y-4 rounded-t-[15px] pt-2 pb-12 shadow-[0_-10px_40px_rgba(0,0,0,0.04)]">
+          {/* Balance Card */}
+          <div className="px-2">
+            <BalanceCard
+              balance={state?.balance ?? 50.43}
+              actions={DASHBOARD_ACTIONS}
+            />
+          </div>
+
+          {/* Promo Cards - Full width but contained */}
+          <div className="pl-3">
+            <PromoCardsContainer>
+              {PROMO_DATA.map((card, idx) => (
+                <PromoCard
+                  key={idx}
+                  {...card}
+                  onClick={() => handlePromoClick(card.title, card.id)}
+                />
+              ))}
+            </PromoCardsContainer>
+          </div>
+
+          {/* DuitNow Link Section */}
+          <div className="-mt-4 px-2">
+            <LinkAccountCard />
+          </div>
+
+          {/* AI Confirmation Hook */}
+          {state.status === "confirming_payment" && (
+            <div className="animate-fade-in mt-4 px-4">
+              <TransferConfirmationCard />
+            </div>
+          )}
+
+          {/* Accounts Section */}
+          <AccountsSection
+            title="Accounts"
+            accounts={MOCK_ACCOUNTS}
+            onAccountClick={(account) =>
+              logger.info({ accountId: account.id }, "Account clicked")
+            }
+          />
+        </main>
+      </div>
     </div>
   );
 }

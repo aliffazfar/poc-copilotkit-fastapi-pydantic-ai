@@ -1,4 +1,65 @@
 @import "tailwindcss";
+
+@layer base {
+  /* Fix for CopilotKit default styles in light theme */
+  .copilot-kit-chat-window,
+  .copilot-kit-messages-container,
+  .copilot-kit-message,
+  .copilot-kit-assistant-message,
+  .copilot-kit-initial-message,
+  .copilotKitMessage,
+  .copilotKitAssistantMessage,
+  .copilotKitInitialMessage,
+  [class*="copilotKit"] {
+    color: #000000 !important;
+  }
+
+  .copilot-kit-message-content,
+  .copilot-kit-message-content *,
+  .copilotKitMessageContent,
+  .copilotKitMessageContent * {
+    color: #000000 !important;
+  }
+
+  /* Force layout to fill height and pin input to bottom */
+  .copilotKitChatWindow,
+  .copilot-kit-chat-window {
+    height: 100% !important;
+    max-height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    background: transparent !important;
+    border: none !important;
+    overflow: hidden !important;
+  }
+
+  .copilotKitMessages,
+  .copilot-kit-messages-container {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow-y: auto !important;
+    min-height: 0 !important;
+    height: 100% !important;
+  }
+
+  .copilotKitChatContainer,
+  .copilot-kit-chat-container {
+    height: 100% !important;
+    max-height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Ensure the custom area in dashboard header fills space */
+  .copilotKitMessagesList,
+  .copilot-kit-messages-list {
+    flex: 1 !important;
+  }
+}
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
@@ -8,8 +69,23 @@
     animation: fadeIn 0.3s ease-out forwards;
   }
 
-  .animate-pulse-slow {
-    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  .animate-fade-in-pure {
+    animation: fadeInPure 0.3s ease-out forwards;
+  }
+
+  .glass-dark {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .glass-pill {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   }
 }
 
@@ -18,25 +94,24 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+@keyframes fadeInPure {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-/* Base styles for scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
 }
 
 @theme inline {
@@ -65,95 +140,79 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+  
+  /* Custom JomKira Colors */
+  --color-jomkira-green: #00C853;
+  --color-jomkira-mint: #E0F7FA;
+  --color-jomkira-pink: #F3E5F5;
+  --color-jomkira-blue-button: #0055FF;
 }
 
+/* JomKira Design System */
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
+  /* Brand Colors */
+  --color-brand-primary: #0055FF;
+  --color-brand-primary-dark: #0044CC;
+  --color-brand-success: #00C853;
+  --color-brand-warning: #EF6C00;
+  --color-brand-error: #EF4444;
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Dashboard Colors */
+  --jomkira-dashboard-bg: #F2F5F9;
+  --jomkira-white: #FFFFFF;
+  --jomkira-mint: #E0F7FA;
+  --jomkira-pink: #F3E5F5;
+  --jomkira-green: var(--color-brand-success);
+  --jomkira-text: #222222;
+  --jomkira-text-secondary: #666666;
+  --jomkira-blue-button: var(--color-brand-primary);
+
+  /* Chat Colors (Aurora Theme) */
+  --jomkira-chat-user: #2979FF;
+  --jomkira-chat-ai: rgba(255, 255, 255, 0.1);
+  --jomkira-aurora-grad: linear-gradient(180deg, #374785 0%, #2E3A59 30%, #1A2744 60%, #0D1117 100%);
+  
+  --radius: 1rem;
+  --radius-dashboard: 24px;
+  --radius-card: 16px;
+
+  /* Shadcn Theme Variables */
+  --background: #F2F5F9;
+  --foreground: #222222;
+  --card: #FFFFFF;
+  --card-foreground: #222222;
+  --popover: #FFFFFF;
+  --popover-foreground: #222222;
+  --primary: var(--color-brand-primary);
+  --primary-foreground: #FFFFFF;
+  --secondary: #E0F7FA;
+  --secondary-foreground: #006064;
+  --muted: #F3F4F6;
+  --muted-foreground: #666666;
+  --accent: #F3E5F5;
+  --accent-foreground: #7B1FA2;
+  --destructive: var(--color-brand-error);
+  --border: #E5E7EB;
+  --input: #E5E7EB;
+  --ring: var(--color-brand-primary);
+  
+  /* CopilotKit CSS Variables - Aurora Theme */
+  --copilot-kit-primary-color: #2979FF !important;
+  --copilot-kit-contrast-color: #FFFFFF !important;
+  --copilot-kit-background-color: transparent !important;
+  --copilot-kit-secondary-color: rgba(31, 41, 55, 0.8) !important;
+  --copilot-kit-secondary-contrast-color: #FFFFFF !important;
+  --copilot-kit-separator-color: rgba(255, 255, 255, 0.1) !important;
+  --copilot-kit-muted-color: rgba(255, 255, 255, 0.6) !important;
+  --copilot-kit-scrollbar-color: rgba(255, 255, 255, 0.2) !important;
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-inter), system-ui, sans-serif;
   }
 }
