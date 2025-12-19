@@ -1,10 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { useCoAgent, useCopilotReadable } from "@copilotkit/react-core";
+import {
+  useCoAgent,
+  useCopilotReadable,
+  useCopilotAction,
+  useCopilotChat,
+} from "@copilotkit/react-core";
 import { CopilotChat } from "@copilotkit/react-ui";
+import { TextMessage, MessageRole } from "@copilotkit/runtime-client-gql";
 import { ActionButton, BankingState, PromoItem } from "@/lib/types";
-import { TransferConfirmationCard } from "@/components/banking/transfer-card";
+import { InChatTransferCard } from "@/components/banking/in-chat-transfer-card";
 import {
   JomKiraUserMessage,
   JomKiraAssistantMessage,
@@ -45,11 +51,85 @@ export default function Home() {
       status: "idle",
     },
   });
+  const { appendMessage } = useCopilotChat();
 
   useCopilotReadable({
     description:
       "The user's current banking state including balance, pending transfers, and transaction history",
     value: state,
+  });
+
+  useCopilotAction({
+    name: "prepare_transfer",
+    available: "disabled", // Render-only - the tool is defined on the backend
+    render: ({ args, status }) => {
+      const { recipient_name, bank_name, account_number, amount, reference } =
+        args as {
+          recipient_name?: string;
+          bank_name?: string;
+          account_number?: string;
+          amount?: number;
+          reference?: string;
+        };
+
+      if (status !== "complete") {
+        return (
+          <div className="p-2 text-sm text-gray-500 italic">
+            Preparing transfer details...
+          </div>
+        );
+      }
+
+      return (
+        <InChatTransferCard
+          recipientName={recipient_name || ""}
+          bankName={bank_name || ""}
+          accountNumber={account_number || ""}
+          amount={amount || 0}
+          reference={reference}
+          onApprove={() => {
+             logger.info(
+               {
+                 amount,
+                 bank_name,
+                 has_reference: !!reference,
+               },
+               "Transfer confirmed by user"
+             );
+            appendMessage(
+              new TextMessage({
+                role: MessageRole.User,
+                content: "Yes, proceed with the transfer.",
+              })
+            );
+          }}
+          onDecline={() => {
+            logger.info(
+              {
+                amount,
+                bank_name,
+                has_reference: !!reference,
+              },
+              "Transfer declined by user"
+            );
+            appendMessage(
+              new TextMessage({
+                role: MessageRole.User,
+                content: "No, cancel the transfer.",
+              })
+            );
+          }}
+          onEdit={() => {
+            appendMessage(
+              new TextMessage({
+                role: MessageRole.User,
+                content: "I need to edit the transfer details.",
+              })
+            );
+          }}
+        />
+      );
+    },
   });
 
   const handleOpenChat = () => {
@@ -219,13 +299,6 @@ export default function Home() {
           <div className="-mt-4 px-2">
             <LinkAccountCard />
           </div>
-
-          {/* AI Confirmation Hook */}
-          {state.status === "confirming_payment" && (
-            <div className="animate-fade-in mt-4 px-4">
-              <TransferConfirmationCard />
-            </div>
-          )}
 
           {/* Accounts Section */}
           <AccountsSection

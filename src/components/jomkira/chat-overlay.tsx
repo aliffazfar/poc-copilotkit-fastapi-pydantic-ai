@@ -40,7 +40,7 @@ export function JomKiraUserMessage({ message }: UserMessageProps) {
 
   return (
     <div className="mb-4 flex justify-end">
-      <div className="max-w-[85%] rounded-[20px] rounded-br-sm bg-[#0055FF] px-4 py-3 text-white shadow-lg shadow-blue-500/10">
+      <div className="bg-jomkira-blue-button max-w-[85%] rounded-[15px] rounded-br-sm px-3.5 py-2.5 text-white shadow-lg shadow-blue-500/10">
         <p className="text-[15px] leading-relaxed font-medium">{textContent}</p>
       </div>
     </div>
@@ -55,33 +55,43 @@ export function JomKiraAssistantMessage({
   isLoading,
   subComponent,
 }: AssistantMessageProps) {
+  const hasContent = message?.content && message.content.trim().length > 0;
+
+  // Do not render anything if there is no content, not loading, and no subComponent
+  if (!hasContent && !isLoading && !subComponent) {
+    return null;
+  }
+
   return (
     <div className="mb-4">
-      <div className="flex justify-start">
-        <div className="max-w-[85%] rounded-[20px] rounded-bl-sm border border-white/60 bg-white/80 px-4 py-3 shadow-sm backdrop-blur-md">
-          {message && (
-            <div className="text-[15px] leading-relaxed font-medium text-black">
-              <Markdown content={message.content || ""} />
-            </div>
-          )}
-          {isLoading && (
-            <div className="flex gap-1.5 py-1">
-              <span
-                className="h-2 w-2 animate-bounce rounded-full bg-[#0055FF]/40"
-                style={{ animationDelay: "0ms" }}
-              />
-              <span
-                className="h-2 w-2 animate-bounce rounded-full bg-[#0055FF]/40"
-                style={{ animationDelay: "150ms" }}
-              />
-              <span
-                className="h-2 w-2 animate-bounce rounded-full bg-[#0055FF]/40"
-                style={{ animationDelay: "300ms" }}
-              />
-            </div>
-          )}
+      {/* Only render the bubble if there is content or loading */}
+      {(hasContent || isLoading) && (
+        <div className="flex justify-start">
+          <div className="max-w-[85%] rounded-[15px] rounded-bl-sm border border-white/60 bg-white/40 px-3.5 py-2.5 shadow-sm backdrop-blur-md">
+            {hasContent && (
+              <div className="leading-relaxed font-medium text-black [&_*]:!text-[15px] [&_*]:!leading-relaxed">
+                <Markdown content={message.content || ""} />
+              </div>
+            )}
+            {isLoading && (
+              <div className="flex gap-1.5 py-1">
+                <span
+                  className="h-2 w-2 animate-bounce rounded-full bg-[#0055FF]/40"
+                  style={{ animationDelay: "0ms" }}
+                />
+                <span
+                  className="h-2 w-2 animate-bounce rounded-full bg-[#0055FF]/40"
+                  style={{ animationDelay: "150ms" }}
+                />
+                <span
+                  className="h-2 w-2 animate-bounce rounded-full bg-[#0055FF]/40"
+                  style={{ animationDelay: "300ms" }}
+                />
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
       {subComponent && <div className="mt-4">{subComponent}</div>}
     </div>
   );
@@ -101,7 +111,7 @@ export function JomKiraInput({ inProgress, onSend }: InputProps) {
     <div className="shrink-0 px-4 pt-2 pb-2">
       {/* Promo Banner */}
       <div className="mb-4 flex items-center gap-3 rounded-2xl border border-white/80 bg-white/40 p-3.5 shadow-sm backdrop-blur-md">
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#0055FF]/10 text-[#0055FF]">
+        <div className="text-jomkira-blue-button flex h-9 w-9 items-center justify-center rounded-full bg-[#0055FF]/10">
           <Wallet className="h-5 w-5" />
         </div>
         <div className="flex-1">
@@ -134,25 +144,25 @@ export function JomKiraInput({ inProgress, onSend }: InputProps) {
         <div className="mt-4 flex items-center justify-between px-1">
           <div className="flex items-center gap-5">
             <button
-              className="text-[#0055FF]/40 transition-colors hover:text-[#0055FF]"
+              className="hover:text-jomkira-blue-button text-[#0055FF]/40 transition-colors"
               type="button"
             >
               <Plus className="h-5.5 w-5.5" />
             </button>
             <button
-              className="text-[#0055FF]/40 transition-colors hover:text-[#0055FF]"
+              className="hover:text-jomkira-blue-button text-[#0055FF]/40 transition-colors"
               type="button"
             >
               <ImageIcon className="h-5.5 w-5.5" />
             </button>
             <button
-              className="text-[#0055FF]/40 transition-colors hover:text-[#0055FF]"
+              className="hover:text-jomkira-blue-button text-[#0055FF]/40 transition-colors"
               type="button"
             >
               <AtSign className="h-5.5 w-5.5" />
             </button>
             <button
-              className="text-[#0055FF]/40 transition-colors hover:text-[#0055FF]"
+              className="hover:text-jomkira-blue-button text-[#0055FF]/40 transition-colors"
               type="button"
             >
               <Sparkles className="h-5.5 w-5.5" />
