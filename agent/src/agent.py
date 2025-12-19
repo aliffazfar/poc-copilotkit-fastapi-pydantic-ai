@@ -1,68 +1,49 @@
-from textwrap import dedent
-from pydantic import BaseModel, Field
+import logfire
+import logging
 from pydantic_ai import Agent, RunContext
 from pydantic_ai.ag_ui import StateDeps
-from ag_ui.core import EventType, StateSnapshotEvent
-from pydantic_ai.models.openai import OpenAIResponsesModel
 
-# load environment variables
-from dotenv import load_dotenv
-load_dotenv()
+# Local Imports
+from config.settings import settings
+from models.banking import BankingState
+from core.model_factory import get_model
+from core.prompts import get_system_prompt
+from tools.banking import prepare_transfer, cancel_transfer, confirm_transfer, get_balance
+from tools.vision import analyze_bill_image
 
-# =====
-# State
-# =====
-class ProverbsState(BaseModel):
-  """List of the proverbs being written."""
-  proverbs: list[str] = Field(
-    default_factory=list,
-    description='The list of already written proverbs',
-  )
+# Setup Logger for this module
+logger = logging.getLogger("jom_kira.agent")
 
-# =====
-# Agent
-# =====
-agent = Agent(
-  model = OpenAIResponsesModel('gpt-4.1-mini'),
-  deps_type=StateDeps[ProverbsState],
-  system_prompt=dedent("""
-    You are a helpful assistant that helps manage and discuss proverbs.
+# Configure logfire
+logfire.configure(send_to_logfire='if-token-present')
+
+def create_agent() -> Agent:
+    """
+    Creates and configures the Agent instance.
+    Called after logging is setup to ensure all logs are captured.
+    """
+    system_prompt = get_system_prompt()
+    logger.info(f"🚀  Starting {settings.APP_NAME} Agent...")
+    logger.info(f"   └─ System Prompt: {len(system_prompt)} chars loaded")
+
+    # Initialize Agent using the modular factory
+    agent_instance = Agent(
+        model=get_model(),
+        deps_type=StateDeps[BankingState],
+        instructions=system_prompt
+    )
+
+    @agent_instance.system_prompt
+    def add_context(ctx: RunContext[StateDeps[BankingState]]) -> str:
+        """Add runtime context to system prompt."""
+        from core.prompts import get_dynamic_context
+        return get_dynamic_context(ctx)
+
+    # Register Tools
+    agent_instance.tool(prepare_transfer)
+    agent_instance.tool(cancel_transfer)
+    agent_instance.tool(confirm_transfer)
+    agent_instance.tool(get_balance)
+    agent_instance.tool(analyze_bill_image)
     
-    The user has a list of proverbs that you can help them manage.
-    You have tools available to add, set, or retrieve proverbs from the list.
-    
-    When discussing proverbs, ALWAYS use the get_proverbs tool to see the current list before
-    mentioning, updating, or discussing proverbs with the user.
-  """).strip()
-)
-
-# =====
-# Tools
-# =====
-@agent.tool
-def get_proverbs(ctx: RunContext[StateDeps[ProverbsState]]) -> list[str]:
-  """Get the current list of proverbs."""
-  print(f"📖 Getting proverbs: {ctx.deps.state.proverbs}")
-  return ctx.deps.state.proverbs
-
-@agent.tool
-async def add_proverbs(ctx: RunContext[StateDeps[ProverbsState]], proverbs: list[str]) -> StateSnapshotEvent:
-  ctx.deps.state.proverbs.extend(proverbs)
-  return StateSnapshotEvent(
-    type=EventType.STATE_SNAPSHOT,
-    snapshot=ctx.deps.state,
-  )
-
-@agent.tool
-async def set_proverbs(ctx: RunContext[StateDeps[ProverbsState]], proverbs: list[str]) -> StateSnapshotEvent:
-  ctx.deps.state.proverbs = proverbs
-  return StateSnapshotEvent(
-    type=EventType.STATE_SNAPSHOT,
-    snapshot=ctx.deps.state,
-  )
-
-
-@agent.tool
-def get_weather(_: RunContext[StateDeps[ProverbsState]], location: str) -> str:
-  """Get the weather for a given location. Ensure location is fully spelled out."""
-  return f"The weather in {location} is sunny."
+    return agent_instance
