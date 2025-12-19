@@ -88,14 +88,14 @@ export default function Home() {
           amount={amount || 0}
           reference={reference}
           onApprove={() => {
-             logger.info(
-               {
-                 amount,
-                 bank_name,
-                 has_reference: !!reference,
-               },
-               "Transfer confirmed by user"
-             );
+            logger.info(
+              {
+                amount,
+                bank_name,
+                has_reference: !!reference,
+              },
+              "Transfer confirmed by user"
+            );
             appendMessage(
               new TextMessage({
                 role: MessageRole.User,
@@ -254,7 +254,6 @@ export default function Home() {
         onCloseChat={handleCloseChat}
       >
         <CopilotChat
-          instructions="You are JomKira AI, a helpful Malaysian banking assistant. Help users transfer money, pay bills, and manage their finances. Be concise and friendly. Always respond in a warm, helpful manner."
           labels={{
             title: "JomKira AI",
             initial: "How can I help you?",
