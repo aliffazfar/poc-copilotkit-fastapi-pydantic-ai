@@ -1,117 +1,53 @@
-# CopilotKit <> PydanticAI Starter
+# JomKira - Banking POC Speedrun 🚧
 
-This is a starter template for building AI agents using [PydanticAI](https://ai.pydantic.dev/) and [CopilotKit](https://copilotkit.ai). It provides a modern Next.js application with an integrated investment analyst agent that can research stocks, analyze market data, and provide investment insights.
+> **Status:** 🚧 Active Development
 
-## Prerequisites
+A Proof of Concept (POC) banking assistant designed to evaluate **CopilotKit** and **PydanticAI** in a fintech context. **This project is a POC focused on exploring CopilotKit's capabilities. Neither the frontend nor the backend are intended to be production-grade implementations.** It demonstrates how to build a fully custom chat interface with deep AI integration, moving beyond standard chatbots to interactive financial tools.
 
-- OpenAI API Key (for the PydanticAI agent)
-- Python 3.12+
-- uv
-- Node.js 20+ 
-- Any of the following package managers:
-  - pnpm (recommended)
-  - npm
-  - yarn
-  - bun
+https://github.com/user-attachments/assets/01628af0-c794-4891-aa8c-75bcb9ee185f
 
-> **Note:** This repository ignores lock files (package-lock.json, yarn.lock, pnpm-lock.yaml, bun.lockb) to avoid conflicts between different package managers. Each developer should generate their own lock file using their preferred package manager. After that, make sure to delete it from the .gitignore.
+## Core Highlights
 
-## Getting Started
+### CopilotKit Integration
 
-1. Install dependencies using your preferred package manager:
-```bash
-# Using pnpm (recommended)
-pnpm install
+Utilizes CopilotKit to power a custom-built chat drawer. The framework handles **Server-Sent Events (SSE)**, state management, and tool execution out of the box, allowing for a seamless integration of AI capabilities into custom UI components.
 
-# Using npm
-npm install
+### Generative UI
 
-# Using yarn
-yarn install
+Renders interactive React components directly within the chat stream. Instead of simple text responses, the agent presents dynamic UI elements (like transfer confirmation cards), enabling rich Human-in-the-Loop workflows.
 
-# Using bun
-bun install
-```
+### Custom Guardrails Middleware
 
-> **Note:** This will automatically setup the Python environment as well.
->
-> If you have manual isseus, you can run:
->
-> ```sh
-> npm run install:agent
-> ```
+Implements a bespoke middleware layer on the backend to sanitize inputs and filter noise before requests reach the LLM. This approach significantly optimizes token usage and ensures data security by stripping unnecessary information early in the pipeline.
 
+## Technical Stack
 
-3. Set up your OpenAI API key:
+- **Frontend:** Next.js 16 (App Router), Tailwind CSS 4, shadcn/ui
+- **Backend:** FastAPI, PydanticAI, Pydantic v2
+- **Infrastructure:** Custom SSE implementation via CopilotKit
 
-Create a `.env` file inside the `agent` folder with the following content:
+## Features
 
-```
-OPENAI_API_KEY=sk-...your-openai-key-here...
-```
+- **Vision-Powered Bill Analysis:** Automatically extracts payment details from receipt images using LLM vision capabilities.
+- **Smart Transfers:** Processes natural language transaction requests and prepares execution details for user confirmation.
+- **Structured Reasoning:** Enforces strict schemas for tool outputs using PydanticAI, ensuring reliable backend operations.
 
+## Quick Start
 
-4. Start the development server:
-```bash
-# Using pnpm
-pnpm dev
+1. **Install Dependencies**
 
-# Using npm
-npm run dev
+   ```bash
+   pnpm install
+   ```
 
-# Using yarn
-yarn dev
+2. **Environment Setup**
 
-# Using bun
-bun run dev
-```
+   Configure `OPENAI_API_KEY` in `.env` at the project root.
 
-This will start both the UI and agent servers concurrently.
+   Refer to `.env.example` or check `agent/src/config/settings.py` for all available configuration options.
 
-## Available Scripts
-The following scripts can also be run using your preferred package manager:
-- `dev` - Starts both UI and agent servers in development mode
-- `dev:debug` - Starts development servers with debug logging enabled
-- `dev:ui` - Starts only the Next.js UI server
-- `dev:agent` - Starts only the PydanticAI agent server
-- `build` - Builds the Next.js application for production
-- `start` - Starts the production server
-- `lint` - Runs ESLint for code linting
-- `install:agent` - Installs Python dependencies for the agent
+3. **Run Development Server**
 
-## Documentation
-
-The main UI component is in `src/app/page.tsx`. You can:
-- Modify the theme colors and styling
-- Add new frontend actions
-- Customize the CopilotKit sidebar appearance
-
-## 📚 Documentation
-
-- [PydanticAI Documentation](https://ai.pydantic.dev) - Learn more about PydanticAI and its features
-- [CopilotKit Documentation](https://docs.copilotkit.ai) - Explore CopilotKit's capabilities
-- [Next.js Documentation](https://nextjs.org/docs) - Learn about Next.js features and API
-
-## Contributing
-
-Feel free to submit issues and enhancement requests! This starter is designed to be easily extensible.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Troubleshooting
-
-### Agent Connection Issues
-If you see "I'm having trouble connecting to my tools", make sure:
-1. The PydanticAI agent is running on port 8000
-2. Your OpenAI API key is set correctly
-3. Both servers started successfully
-
-### Python Dependencies
-If you encounter Python import errors:
-```bash
-cd agent
-uv sync
-uv run src/main.py
-```
+   ```bash
+   pnpm dev
+   ```
