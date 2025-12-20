@@ -8,7 +8,15 @@ from config.settings import settings
 from models.banking import BankingState
 from core.model_factory import get_model
 from core.prompts import get_system_prompt
-from tools.banking import prepare_transfer, cancel_transfer, confirm_transfer, get_balance
+from tools.banking import (
+    prepare_transfer,
+    prepare_bill_payment,
+    cancel_transfer,
+    cancel_payment,
+    confirm_transfer,
+    confirm_bill_payment,
+    get_balance,
+)
 from tools.vision import analyze_bill_image
 
 # Setup Logger for this module
@@ -39,10 +47,17 @@ def create_agent() -> Agent:
         from core.prompts import get_dynamic_context
         return get_dynamic_context(ctx)
 
-    # Register Tools
+    # Register Tools - Transfers
     agent_instance.tool(prepare_transfer)
     agent_instance.tool(cancel_transfer)
     agent_instance.tool(confirm_transfer)
+    
+    # Register Tools - Bill Payments
+    agent_instance.tool(prepare_bill_payment)
+    agent_instance.tool(confirm_bill_payment)
+    agent_instance.tool(cancel_payment)
+    
+    # Register Tools - Utility
     agent_instance.tool(get_balance)
     agent_instance.tool(analyze_bill_image)
     
