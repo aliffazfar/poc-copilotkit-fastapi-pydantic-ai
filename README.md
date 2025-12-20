@@ -1,10 +1,19 @@
 # JomKira - Banking POC Speedrun 🚧
 
-> **Status:** 🚧 Active Development
+> **Status:** ✅ POC Complete
 
 A Proof of Concept (POC) banking assistant designed to evaluate **CopilotKit** and **PydanticAI** in a fintech context. **This project is a POC focused on exploring CopilotKit's capabilities. Neither the frontend nor the backend are intended to be production-grade implementations.** It demonstrates how to build a fully custom chat interface with deep AI integration, moving beyond standard chatbots to interactive financial tools.
 
-https://github.com/user-attachments/assets/01628af0-c794-4891-aa8c-75bcb9ee185f
+<table>
+  <tr>
+    <td width="50%">
+      <img src="https://github.com/user-attachments/assets/e45baa3e-d1b2-4686-a01f-fa18fa26c0e7" width="100%" alt="Bill Payment Demo">
+    </td>
+    <td width="50%">
+      <img src="https://github.com/user-attachments/assets/c4f948e2-76b7-4451-b138-ac2bf1b2d337" width="100%" alt="Transfer Demo">
+    </td>
+  </tr>
+</table>
 
 ## Core Highlights
 
