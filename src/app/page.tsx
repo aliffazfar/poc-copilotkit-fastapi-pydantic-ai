@@ -10,7 +10,7 @@ import {
 import { CopilotChat } from "@copilotkit/react-ui";
 import { TextMessage, MessageRole } from "@copilotkit/runtime-client-gql";
 import { ActionButton, BankingState, PromoItem } from "@/lib/types";
-import { InChatTransferCard } from "@/components/banking/in-chat-transfer-card";
+import { InChatPaymentCard } from "@/components/banking/in-chat-payment-card";
 import {
   JomKiraUserMessage,
   JomKiraAssistantMessage,
@@ -47,6 +47,7 @@ export default function Home() {
     initialState: {
       balance: 50.43,
       pending_transfer: null,
+      pending_bill: null,
       transaction_history: [],
       status: "idle",
     },
@@ -59,6 +60,7 @@ export default function Home() {
     value: state,
   });
 
+  // Render-only action for fund transfers
   useCopilotAction({
     name: "prepare_transfer",
     available: "disabled", // Render-only - the tool is defined on the backend
@@ -81,7 +83,8 @@ export default function Home() {
       }
 
       return (
-        <InChatTransferCard
+        <InChatPaymentCard
+          type="transfer"
           recipientName={recipient_name || ""}
           bankName={bank_name || ""}
           accountNumber={account_number || ""}
@@ -124,6 +127,86 @@ export default function Home() {
               new TextMessage({
                 role: MessageRole.User,
                 content: "I need to edit the transfer details.",
+              })
+            );
+          }}
+        />
+      );
+    },
+  });
+
+  // Render-only action for bill payments
+  useCopilotAction({
+    name: "prepare_bill_payment",
+    available: "disabled", // Render-only - the tool is defined on the backend
+    render: ({ args, status }) => {
+      const {
+        biller_name,
+        account_number,
+        amount,
+        due_date,
+        reference_number,
+      } = args as {
+        biller_name?: string;
+        account_number?: string;
+        amount?: number;
+        due_date?: string;
+        reference_number?: string;
+      };
+
+      if (status !== "complete") {
+        return (
+          <div className="p-2 text-sm text-gray-500 italic">
+            Preparing bill payment details...
+          </div>
+        );
+      }
+
+      return (
+        <InChatPaymentCard
+          type="bill"
+          billerName={biller_name || ""}
+          billerAccountNumber={account_number || ""}
+          amount={amount || 0}
+          dueDate={due_date}
+          reference={reference_number}
+          onApprove={() => {
+            logger.info(
+              {
+                amount,
+                biller_name,
+                has_due_date: !!due_date,
+              },
+              "Bill payment confirmed by user"
+            );
+            appendMessage(
+              new TextMessage({
+                role: MessageRole.User,
+                content: "Yes, proceed with the bill payment.",
+              })
+            );
+          }}
+          onDecline={() => {
+            logger.info(
+              {
+                amount,
+                biller_name,
+                has_due_date: !!due_date,
+              },
+              "Bill payment declined by user"
+            );
+            appendMessage(
+              new TextMessage({
+                role: MessageRole.User,
+                content: "No, cancel the bill payment.",
+              })
+            );
+          }}
+          onEdit={() => {
+            appendMessage(
+              new TextMessage({
+                role: MessageRole.User,
+                content: "I need to edit the bill payment details.",
               })
             );
           }}
@@ -263,6 +346,7 @@ export default function Home() {
           AssistantMessage={JomKiraAssistantMessage}
           Input={JomKiraInput}
           className="h-full"
+          imageUploadsEnabled
         />
       </DashboardHeader>
 
